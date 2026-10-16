@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClearCut AI — Image Enhancer</title>
+<style>
+:root{--bg:#0b1020;--panel:#141c30;--line:#293650;--text:#f4f6ff;--muted:#9eacc5;--accent:#a4f36b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif}
+header{height:76px;padding:0 6%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.logo{font-size:23px;font-weight:850;letter-spacing:-1px}.logo span{color:var(--accent)}
+.pill{border:1px solid #3c4c61;border-radius:30px;padding:7px 12px;color:var(--muted);font-size:12px}
+main{max-width:1120px;margin:42px auto;padding:0 18px}
+.hero{text-align:center;margin-bottom:32px}
+.eyebrow{color:var(--accent);font-size:12px;letter-spacing:2px;font-weight:800}
+h1{font-size:clamp(34px,6vw,58px);letter-spacing:-2px;line-height:1.08;margin:14px 0}
+.hero p{color:var(--muted);max-width:580px;margin:0 auto;line-height:1.7}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0}
+.drop{min-height:345px;border:1px dashed #53627c;border-radius:13px;display:flex;align-items:center;justify-content:center;text-align:center;padding:22px;position:relative;overflow:hidden;background:#10182a}
+.drop.drag{border-color:var(--accent)}
+#preview{display:none;max-width:100%;max-height:440px;object-fit:contain;border-radius:7px}
+.uploadIcon{font-size:40px;color:var(--accent)}
+.drop h3{margin:10px 0 4px}.muted{color:var(--muted);font-size:13px}
+button,.fileButton,select{font:inherit;border:1px solid var(--line);background:#202b43;color:var(--text);padding:11px 13px;border-radius:10px;cursor:pointer}
+button:hover,.fileButton:hover{border-color:var(--accent)}
+.primary{background:var(--accent);color:#111a0b;border-color:var(--accent);font-weight:800}
+button:disabled{opacity:.45;cursor:not-allowed}
+input[type=file]{display:none}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.side h3{margin:0 0 17px}
+.field{margin:19px 0}.field label{display:block;font-size:13px;margin-bottom:9px}
+select{width:100%}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.options button.active{border-color:var(--accent);color:var(--accent);background:#202e29}
+.hint{font-size:12px;color:var(--muted);line-height:1.6;margin-top:8px}
+.status{margin-top:12px;font-size:13px;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere}
+.progress{height:4px;background:#293650;border-radius:5px;margin-top:12px;overflow:hidden}
+#bar{height:100%;width:0;background:var(--accent);transition:width .2s}
+.tip{padding:12px;border:1px solid var(--line);border-radius:10px;color:var(--muted);font-size:12px;line-height:1.6;margin-top:18px}
+footer{text-align:center;color:var(--muted);padding:30px 15px;font-size:12px}
+@media(max-width:760px){header{padding:0 18px}.layout{grid-template-columns:1fr}main{margin-top:28px}.drop{min-height:260px}.side{order:2}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">✦ Clear<span>Cut</span></div>
+  <div class="pill">AI IMAGE ENHANCER</div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">BETTER DETAILS. BIGGER IMAGES.</div>
+    <h1>Give your images<br><span style="color:var(--accent)">a new life.</span></h1>
+    <p>Enhance photographs, restore details and upscale 2D artwork with an AI-powered workflow.</p>
+  </section>
+
+  <div class="layout">
+    <section class="panel">
+      <div class="drop" id="drop">
+        <div id="empty">
+          <div class="uploadIcon">✧</div>
+          <h3>Upload your image</h3>
+          <div class="muted">Drop an image here or browse your device</div>
+          <label class="fileButton" style="display:inline-block;margin-top:17px">
+            Choose image <input type="file" id="file" accept="image/png,image/jpeg,image/webp">
+          </label>
+          <div class="hint">JPG, PNG or WebP · Maximum 15 MB</div>
+        </div>
+        <img id="preview" alt="Selected image preview">
+      </div>
+      <div class="controls">
+        <label class="fileButton">Change image <input type="file" id="file2" accept="image/png,image/jpeg,image/webp"></label>
+        <button id="enhance" class="primary" disabled>✦ Enhance image</button>
+        <button id="download" disabled>Download result</button>
+      </div>
+      <div class="progress"><div id="bar"></div></div>
+      <div class="status" id="status">Choose an image to get started.</div>
+    </section>
+
+    <aside class="panel side">
+      <h3>Enhancement settings</h3>
+      <div class="field">
+        <label>Image type</label>
+        <div class="options">
+          <button class="active" data-mode="photo">📷 Photo</button>
+          <button data-mode="art">🎨 2D Art</button>
+        </div>
+        <div class="hint" id="modeHint">Optimized settings for portraits, people and real-world photos.</div>
+      </div>
+      <div class="field">
+        <label for="scale">Upscale factor</label>
+        <select id="scale">
+          <option value="2">2× — Balanced</option>
+          <option value="4">4× — Maximum detail</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="strength">Enhancement strength</label>
+        <select id="strength">
+          <option value="natural">Natural</option>
+          <option value="balanced" selected>Balanced</option>
+          <option value="strong">Strong</option>
+        </select>
+      </div>
+      <div class="tip">
+        <strong style="color:var(--text)">AI engine setup</strong><br>
+        Image preview is ready. The AI processing service will be connected in the next setup step. This page does not yet enhance pixels by itself.
+      </div>
+      <div class="tip">
+        <strong style="color:var(--text)">Privacy</strong><br>
+        The preview is created in your browser. A connected AI server will be needed to process images.
+      </div>
+    </aside>
+  </div>
+</main>
+<footer>ClearCut AI Image Enhancer · Photos & illustrations</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+let selectedFile=null;
+let currentMode='photo';
+let resultUrl=null;
+
+function setStatus(t){$('status').textContent=t}
+function setProgress(n){$('bar').style.width=n+'%'}
+
+function loadFile(file){
+  if(!file)return;
+  if(!file.type.startsWith('image/')){
+    setStatus('Please choose a valid image file.');return;
+  }
+  if(file.size>15*1024*1024){
+    setStatus('This image is over 15 MB. Please choose a smaller file.');return;
+  }
+  selectedFile=file;
+  if(resultUrl){URL.revokeObjectURL(resultUrl);resultUrl=null}
+  $('preview').src=URL.createObjectURL(file);
+  $('preview').style.display='block';
+  $('empty').style.display='none';
+  $('enhance').disabled=false;
+  $('download').disabled=true;
+  setProgress(0);
+  setStatus('Image loaded. Choose your settings, then connect the AI engine to enhance it.');
+}
+$('file').addEventListener('change',e=>loadFile(e.target.files[0]));
+$('file2').addEventListener('change',e=>loadFile(e.target.files[0]));
+
+document.querySelectorAll('[data-mode]').forEach(button=>{
+  button.addEventListener('click',()=>{
+    currentMode=button.dataset.mode;
+    document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b===button));
+    $('modeHint').textContent=currentMode==='photo'
+      ?'Optimized settings for portraits, people and real-world photos.'
+      :'Optimized settings for 2D characters, cartoons and illustrations.';
+  });
+});
+
+const drop=$('drop');
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag')});
+drop.addEventListener('dragleave',()=>drop.classList.remove('drag'));
+drop.addEventListener('drop',e=>{
+  e.preventDefault();drop.classList.remove('drag');loadFile(e.dataTransfer.files[0]);
+});
+
+$('enhance').addEventListener('click',()=>{
+  setStatus('AI engine is not connected yet. Next we will set up the Python enhancement service.');
+  setProgress(0);
+});
+$('download').addEventListener('click',()=>{
+  if(!resultUrl)return;
+  const a=document.createElement('a');
+  a.href=resultUrl;a.download='clearcut-enhanced.png';a.click();
+});
+</script>
+</body>
+</html>
